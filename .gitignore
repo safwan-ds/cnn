@@ -1,0 +1,41 @@
+# --- Python Standard ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+venv/
+env/
+
+# --- PyCharm (IDE Settings) ---
+# You generally don't want to share your local IDE configs
+.idea/
+
+# --- Project Data ---
+# Exclude the actual CIFAR-10 dataset (it's large and can be re-downloaded)
+data/
+datasets/
+
+# --- Model Checkpoints ---
+# Don't commit large weight files (hundreds of MBs)
+*.pth
+*.pt
+*.ckpt
+*.pkl
+
+# --- Output Files & Plots ---
+# Exclude generated graphs so you don't clutter the repo
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+*.csv
+
+# --- OS Specific (Windows/Mac) ---
+Thumbs.db
+.DS_Store
+
+# --- Logs (If you use Tensorboard later) ---
+runs/
+logs/
