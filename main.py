@@ -1,4 +1,4 @@
-import numpy as np
+import csv
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -133,22 +133,26 @@ if __name__ == "__main__":
         model.to(device)
         results.append(train(model, trainloader, testloader, device, epochs=EPOCHS))
 
-    with open("error_train.csv", "w") as f:
-        f.write(
-            f"iteration,{','.join([model.__name__ for model, used in USED_MODELS.items() if used])}\n"
+    with open("error_train.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            ["iteration"]
+            + [model.__name__ for model, used in USED_MODELS.items() if used]
         )
         for iter in range(len(results[0][0])):
-            f.write(
-                f"{iter+1},{','.join([f'{results[j][0][iter]:.6f}' for j in range(len(results))])}\n"
+            writer.writerow(
+                [iter + 1] + [f"{results[j][0][iter]:.6f}" for j in range(len(results))]
             )
 
-    with open("error_test.csv", "w") as f:
-        f.write(
-            f"epoch,{','.join([model.__name__ for model, used in USED_MODELS.items() if used])}\n"
+    with open("error_test.csv", "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(
+            ["epoch"] + [model.__name__ for model, used in USED_MODELS.items() if used]
         )
-        for i in range(EPOCHS):
-            f.write(
-                f"{i+1},{','.join([f'{results[j][1][i]:.2f}' for j in range(len(results))])}\n"
+        for epoch in range(EPOCHS):
+            writer.writerow(
+                [epoch + 1]
+                + [f"{results[j][1][epoch]:.2f}" for j in range(len(results))]
             )
 
     print("Training complete. Results saved to 'error_train.csv' and 'error_test.csv'.")
