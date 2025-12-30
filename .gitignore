@@ -25,6 +25,8 @@ datasets/
 
 # --- Output Files & Plots ---
 # Exclude generated graphs so you don't clutter the repo
+results/
+plots/
 *.png
 *.jpg
 *.jpeg

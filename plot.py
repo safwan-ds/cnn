@@ -1,21 +1,30 @@
 import csv
+import glob
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     plt.rcParams.update({"font.family": "serif"})
 
-    plt.figure(figsize=(8, 6))
-    with open("error_train.csv", "r") as f:
-        reader = csv.reader(f)
-        header = next(reader)
-        model_names = header[1:]
+    # Find all training error files
+    train_files = glob.glob("results/error_train_*.csv")
 
-        data = list(reader)
-        for idx, model_name in enumerate(model_names):
-            error_train = [float(row[idx + 1]) for row in data]
+    if train_files:
+        plt.figure(figsize=(8, 6))
+        for filepath in train_files:
+            model_name = (
+                os.path.basename(filepath)
+                .replace("error_train_", "")
+                .replace(".csv", "")
+            )
+            with open(filepath, "r") as f:
+                reader = csv.reader(f)
+                next(reader)  # Skip header
+                error_train = [float(row[1]) for row in reader]
+
             print(
-                f"Last iteration average training error for {model_name}: {np.mean(error_train[-391:]):.2f}%"
+                f"Last batch average training error for {model_name}: {np.mean(error_train[-391:]):.2f}%"
             )
 
             plt.plot(
@@ -32,19 +41,28 @@ if __name__ == "__main__":
         plt.ylabel("Error (%)")
         plt.grid(True, linestyle="--", alpha=0.6)
         plt.legend()
-        plt.savefig("error_train_plot.pdf", format="pdf", bbox_inches="tight")
-        print("Saved training error plot as 'error_train_plot.pdf'.")
+        plt.savefig("plots/error_train_plot.pdf", format="pdf", bbox_inches="tight")
+        print("Saved training error plot as 'plots/error_train_plot.pdf'.")
 
-    plt.figure(figsize=(8, 6))
-    with open("error_test.csv", "r") as f:
-        reader = csv.reader(f)
-        header = next(reader)
-        model_names = header[1:]
+    # Find all test error files
+    test_files = glob.glob("results/error_test_*.csv")
 
-        data = list(reader)
-        for idx, model_name in enumerate(model_names):
-            error_test = [float(row[idx + 1]) for row in data]
+    if test_files:
+        plt.figure(figsize=(8, 6))
+        epochs = 0
+        for filepath in test_files:
+            model_name = (
+                os.path.basename(filepath)
+                .replace("error_test_", "")
+                .replace(".csv", "")
+            )
+            with open(filepath, "r") as f:
+                reader = csv.reader(f)
+                next(reader)  # Skip header
+                error_test = [float(row[1]) for row in reader]
+
             print(f"The lowest test error for {model_name}: {min(error_test):.2f}%")
+            epochs = max(epochs, len(error_test))
 
             plt.plot(
                 np.arange(1, len(error_test) + 1),
@@ -55,12 +73,11 @@ if __name__ == "__main__":
                 marker="o",
             )
 
-        epochs = len(data) + 1
         plt.title("CIFAR-10 Test Error Rate per Epoch")
         plt.xlabel("Epoch")
         plt.ylabel("Error (%)")
         plt.grid(True, linestyle="--", alpha=0.6)
-        plt.xticks(np.arange(1, epochs))
+        plt.xticks(np.arange(1, epochs + 1))
         plt.legend()
-        plt.savefig("error_test_plot.pdf", format="pdf", bbox_inches="tight")
-        print("Saved test error plot as 'error_test_plot.pdf'.")
+        plt.savefig("plots/error_test_plot.pdf", format="pdf", bbox_inches="tight")
+        print("Saved test error plot as 'plots/error_test_plot.pdf'.")

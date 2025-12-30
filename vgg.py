@@ -28,6 +28,20 @@ class VggNet(nn.Module):
         for x in architecture:
             if x == "M":
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+            elif isinstance(x, tuple):
+                out_channels, stride = x
+                layers += [
+                    nn.Conv2d(
+                        in_channels,
+                        out_channels,
+                        kernel_size=3,
+                        padding=1,
+                        stride=stride,
+                    ),
+                    nn.BatchNorm2d(out_channels),
+                    nn.ReLU(inplace=True),
+                ]
+                in_channels = out_channels
             else:
                 layers += [
                     nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
@@ -104,6 +118,27 @@ def vgg16(num_classes=10):
             512,
             512,
             "M",
+        ],
+        num_classes=num_classes,
+    )
+
+
+def vgg16_no_pooling(num_classes=10):
+    return VggNet(
+        [
+            64,
+            (64, 2),
+            128,
+            (128, 2),
+            256,
+            256,
+            (256, 2),
+            512,
+            512,
+            (512, 2),
+            512,
+            512,
+            (512, 2),
         ],
         num_classes=num_classes,
     )

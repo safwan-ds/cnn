@@ -4,12 +4,11 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
-import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from resnet import resnet18, plain18, resnet34, resnet50, resnet101
-from vgg import vgg11, vgg13, vgg16, vgg19
+from vgg import vgg11, vgg13, vgg16, vgg16_no_pooling, vgg19
 
 
 def get_data_loaders(batch_size=128):
@@ -113,10 +112,11 @@ if __name__ == "__main__":
     USED_MODELS = {
         vgg11: False,
         vgg13: False,
-        vgg16: True,
+        vgg16: False,
+        vgg16_no_pooling: True,
         vgg19: False,
-        resnet18: True,
-        plain18: True,
+        resnet18: False,
+        plain18: False,
         resnet34: False,
         resnet50: False,
         resnet101: False,
@@ -126,33 +126,32 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
 
     trainloader, testloader = get_data_loaders(batch_size=BATCH_SIZE)
-    models = [model(num_classes=10) for model, used in USED_MODELS.items() if used]
-    results = []
+    model_funcs = [model for model, used in USED_MODELS.items() if used]
 
-    for model in models:
+    for model_func in model_funcs:
+        model = model_func(num_classes=10)
+        model_name = model_func.__name__
         model.to(device)
-        results.append(train(model, trainloader, testloader, device, epochs=EPOCHS))
-
-    with open("error_train.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(
-            ["iteration"]
-            + [model.__name__ for model, used in USED_MODELS.items() if used]
+        error_train, error_test = train(
+            model, trainloader, testloader, device, epochs=EPOCHS
         )
-        for iter in range(len(results[0][0])):
-            writer.writerow(
-                [iter + 1] + [f"{results[j][0][iter]:.6f}" for j in range(len(results))]
-            )
 
-    with open("error_test.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(
-            ["epoch"] + [model.__name__ for model, used in USED_MODELS.items() if used]
+        # Save training error for this model
+        with open(f"results/error_train_{model_name}.csv", "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["iteration", "error"])
+            for iter_idx, error in enumerate(error_train):
+                writer.writerow([iter_idx + 1, f"{error:.6f}"])
+
+        # Save test error for this model
+        with open(f"results/error_test_{model_name}.csv", "w", newline="") as f:
+            writer = csv.writer(f)
+            writer.writerow(["epoch", "error"])
+            for epoch_idx, error in enumerate(error_test):
+                writer.writerow([epoch_idx + 1, f"{error:.2f}"])
+
+        print(
+            f"Results saved for {model_name} to results/error_test_{model_name}.csv and results/error_train_{model_name}.csv."
         )
-        for epoch in range(EPOCHS):
-            writer.writerow(
-                [epoch + 1]
-                + [f"{results[j][1][epoch]:.2f}" for j in range(len(results))]
-            )
 
-    print("Training complete. Results saved to 'error_train.csv' and 'error_test.csv'.")
+    print("Training complete.")
