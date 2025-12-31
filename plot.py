@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 if __name__ == "__main__":
     plt.rcParams.update({"font.family": "serif"})
 
+    if not os.path.exists("plots"):
+        os.makedirs("plots")
+
     train_files = glob.glob("results/error_train_*.csv")
 
     if train_files:

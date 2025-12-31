@@ -1,4 +1,5 @@
 import csv
+import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -128,6 +129,8 @@ if __name__ == "__main__":
     trainloader, testloader = get_data_loaders(batch_size=BATCH_SIZE)
     model_funcs = [model for model, used in USED_MODELS.items() if used]
 
+    if not os.path.exists("results"):
+        os.makedirs("results")
     for model_func in model_funcs:
         model = model_func(num_classes=10)
         model_name = model_func.__name__
@@ -136,14 +139,12 @@ if __name__ == "__main__":
             model, trainloader, testloader, device, epochs=EPOCHS
         )
 
-        # Save training error for this model
         with open(f"results/error_train_{model_name}.csv", "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["iteration", "error"])
             for iter_idx, error in enumerate(error_train):
                 writer.writerow([iter_idx + 1, f"{error:.6f}"])
 
-        # Save test error for this model
         with open(f"results/error_test_{model_name}.csv", "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(["epoch", "error"])
