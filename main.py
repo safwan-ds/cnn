@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 from resnet import resnet18, plain18, resnet34, resnet50, resnet101
 from vgg import vgg11, vgg13, vgg16, vgg16_no_pooling, vgg19
+from plot import plot
 
 
 def get_data_loaders(batch_size=128):
@@ -156,3 +157,5 @@ if __name__ == "__main__":
         )
 
     print("Training complete.")
+
+    plot()

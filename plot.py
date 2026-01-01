@@ -4,7 +4,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-if __name__ == "__main__":
+
+def plot():
     plt.rcParams.update({"font.family": "serif"})
 
     if not os.path.exists("plots"):
@@ -140,3 +141,7 @@ if __name__ == "__main__":
             "plots/generalization_gap_plot.pdf", format="pdf", bbox_inches="tight"
         )
         print("Saved generalization gap plot as 'plots/generalization_gap_plot.pdf'.")
+
+
+if __name__ == "__main__":
+    plot()
